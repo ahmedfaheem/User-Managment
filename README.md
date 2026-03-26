@@ -1,58 +1,134 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inertiajs
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13 application using Inertia.js with Vue 3 for the frontend.
 
-## About Laravel
+The app currently includes:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Authentication pages for register, login, and logout
+- An authenticated home page that lists users
+- User search by name or email
+- Paginated user results with configurable page size
+- Authorization-aware UI flags for edit/delete actions
+- Extra authenticated pages for `About` and `Dashboard`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.3
+- Laravel 13
+- Inertia.js Laravel adapter
+- Vue 3
+- Vite
+- Tailwind CSS 4
+- Ziggy
+- Pest
+- SQLite by default
 
-## Learning Laravel
+## Project Structure
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+.
+├── app/
+├── bootstrap/
+├── config/
+├── database/
+├── public/
+├── resources/
+│   └── js/
+│       ├── Pages/
+│       └── app.js
+├── routes/
+│   └── web.php
+├── tests/
+├── vue-project/
+├── artisan
+├── composer.json
+├── package.json
+└── vite.config.js
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Main Routes
 
-## Contributing
+- `/login` for guest login
+- `/register` for guest registration
+- `/` authenticated home page with paginated users
+- `/about` authenticated about page
+- `/dashboard` authenticated dashboard page
+- `/logout` POST route for authenticated logout
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Local Setup
 
-## Code of Conduct
+### 1. Install dependencies
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+npm install
+```
 
-## Security Vulnerabilities
+### 2. Prepare environment
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## License
+### 3. Configure database
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project defaults to SQLite.
+
+```bash
+touch database/database.sqlite
+php artisan migrate
+```
+
+If you want to use MySQL instead, update the `DB_*` values in `.env`.
+
+### 4. Start development servers
+
+Run Laravel and Vite separately:
+
+```bash
+php artisan serve
+npm run dev
+```
+
+Or use the Composer helper script:
+
+```bash
+composer run dev
+```
+
+## Useful Commands
+
+```bash
+composer run dev
+composer run test
+npm run dev
+npm run build
+php artisan migrate
+php artisan serve
+```
+
+## Frontend Notes
+
+- Inertia bootstrapping lives in `resources/js/app.js`
+- Vue pages live in `resources/js/Pages`
+- A default layout is applied automatically when a page does not define one
+- Ziggy is enabled, so named Laravel routes can be used in Vue components
+
+## Standalone `vue-project` Folder
+
+This repository also contains a separate `vue-project/` Vite app. It is not the main frontend used by the Laravel/Inertia application, but it can be run independently from inside that folder if needed.
+
+## Testing
+
+The backend test setup uses Pest.
+
+```bash
+composer run test
+```
+
+## Notes
+
+- The home route is protected by `auth` middleware
+- User search and pagination are handled in `routes/web.php`
+- The app expects authentication and authorization logic to be available for user actions
