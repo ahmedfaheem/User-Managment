@@ -1,7 +1,7 @@
 <script setup>
 
 import {reactive, watch, ref} from "vue";
-import {router} from "@inertiajs/vue3";
+import {Link, router} from "@inertiajs/vue3";
 import debounce from 'lodash/debounce'
 import {floor} from "lodash-es";
 const props = defineProps({
@@ -13,7 +13,8 @@ const props = defineProps({
     totalUsers: Number,
     activeUsers: Number,
     roles: Array,
-    needVerifyCount:Number
+    needVerifyCount:Number,
+    currentUser: Object
 })
 
 
@@ -63,8 +64,8 @@ watch(
                     </p>
 
                     <div class="mt-6 flex flex-wrap gap-3">
-                        <a href="#" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Browse users</a>
-                        <a href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">Export users</a>
+                 <!--       <Link :href="route('dashboard')" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Browse users</Link>-->
+                        <a v-if="currentUser.role=='admin'" :href="route('export-users')" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Export users</a>
                     </div>
                 </div>
 

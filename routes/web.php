@@ -27,3 +27,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get("/dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
 });
+
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+Route::get('/export-users', function () {
+    return Excel::download(new UsersExport, 'users.xlsx');
+})->name('export-users')->middleware('auth', 'IsAdmin');

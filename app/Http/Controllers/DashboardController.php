@@ -41,6 +41,7 @@ class DashboardController extends Controller
                 'roles' => User::distinct('role')->pluck('role'),
                 'needVerifyCount' => User::where('email_verified_at', null)->count(),
                 'filter'=>['search' => $request->search, 'count' => $pageCount, 'role' => $request->role ?? null],
+                'currentUser' => Auth::user(),
             ]);
     }
 
