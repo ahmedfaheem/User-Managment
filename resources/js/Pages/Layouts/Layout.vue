@@ -113,5 +113,33 @@
         <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <slot />
         </main>
+
+        <footer class="mt-10 border-t border-white/10 bg-slate-950/90 shadow-[0_-12px_40px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+            <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-300">
+                        My App
+                    </p>
+                    <p class="mt-2 text-sm text-slate-300">
+                        Practical web experiences built with Laravel, Inertia, and Vue.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-3 text-sm text-slate-400 sm:flex-row sm:items-center sm:gap-6">
+                    <a href="#" class="transition hover:text-white">
+                        Privacy
+                    </a>
+                    <a href="#" class="transition hover:text-white">
+                        Terms
+                    </a>
+                    <a href="#" class="transition hover:text-white">
+                        Support
+                    </a>
+                    <p class="text-slate-500">
+                        © 2026 My App. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
     </div>
 </template>

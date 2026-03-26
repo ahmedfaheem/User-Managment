@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use Inertia\Inertia;
-
-
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutController;
 
 
 Route::middleware(['guest'])->group(function () {
@@ -20,10 +21,9 @@ Route::middleware(['guest'])->group(function () {
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('/', UserController::class)->names(['index' => 'home']);
+    Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::inertia("/about", "About", ["test"=> "hello About"])->name('about');
-    Route::inertia("/dashboard", "Dashboard")->name('dashboard');
+    Route::get('/about', [AboutController::class, 'index'])->name('about');
+    Route::get("/dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
 });
-

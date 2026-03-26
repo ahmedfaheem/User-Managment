@@ -1,260 +1,347 @@
 <script setup>
-
-import {reactive, watch, ref} from "vue";
-import {router} from "@inertiajs/vue3";
-import debounce from 'lodash/debounce'
-import {floor} from "lodash-es";
-const props = defineProps({
-    'users':{
-        type:Object,
-        required: true
+defineProps({
+    currentUser: {
+        type: Object,
+        required: true,
     },
-    filter: Object,
-    totalUsers: Number,
-    activeUsers: Number,
-    roles: Array,
-    needVerifyCount:Number
+    stats: {
+        type: Object,
+        required: true,
+    },
+    roleBreakdown: {
+        type: Array,
+        required: true,
+    },
+    recentUsers: {
+        type: Array,
+        required: true,
+    },
 })
-
-
-const filter = reactive({
-    count: props.filter.count,
-    role:  props.filter.role ?? 'all',
-    search: props.filter.search
-})
-
-
-
-
-
-
-
-
-watch(
-    filter,
-    debounce((value) => {
-        router.get(
-            route('home'),
-            { search: filter.search, count: filter.count, role: filter.role},
-            {
-                replace: true,
-                preserveScroll: true,
-                preserveState: true,
-            }
-        )    }, 500)
-)
 </script>
 
 <template>
-
     <Head title="Home">
         <meta name="description" content="Description Of Home" head-key="description" />
     </Head>
 
-    <div class="p-3 bg-green-400 my-3" v-if="$page.flash.message" >
-        {{$page.flash.message}}
-    </div>
-    <div class="space-y-8">
-        <section class="relative overflow-hidden rounded-[28px] bg-slate-950 px-6 py-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)] sm:px-8 lg:px-10">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(45,212,191,0.18),_transparent_28%)]"></div>
+    <section class="home-page">
+        <div class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">Welcome</p>
+                <h1>Build faster with a clean Laravel, Inertia, and Vue workflow.</h1>
+                <p class="lead">
+                    Your production home page now surfaces real application data from Laravel,
+                    including user metrics, account health, and the latest registered members.
+                </p>
 
-            <div class="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-                <div class="max-w-2xl">
-                    <span class="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">
-                        User Management
-                    </span>
-                    <h1 class="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
-                        Manage users, roles, and account status from one workspace
-                    </h1>
-                    <p class="mt-4 text-sm leading-6 text-slate-300 sm:text-base">
-                        Review user records, monitor account activity, and handle permissions from a summary that leads directly into the user table below.
+                <div class="actions">
+                    <Link :href="route('dashboard')" class="primary-btn">
+                        Open Dashboard
+                    </Link>
+                    <Link :href="route('about')" class="secondary-btn">
+                        Learn More
+                    </Link>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <p class="panel-label">Signed in as</p>
+                <h2>{{ currentUser.name }}</h2>
+                <p class="panel-copy">
+                    Role: {{ currentUser.role }}
+                    <br>
+                    Verification:
+                    {{ currentUser.verified ? 'Verified account' : 'Verification pending' }}
+                    <br>
+                    Joined: {{ currentUser.joined_at }}
+                </p>
+            </div>
+        </div>
+
+        <section class="stats-grid">
+            <article class="stat-card">
+                <strong>{{ stats.totalUsers }}</strong>
+                <span>Total registered users</span>
+            </article>
+            <article class="stat-card">
+                <strong>{{ stats.activeUsers }}</strong>
+                <span>Active user accounts</span>
+            </article>
+            <article class="stat-card">
+                <strong>{{ stats.unverifiedUsers }}</strong>
+                <span>Accounts still pending verification</span>
+            </article>
+        </section>
+
+        <section class="features-section">
+            <div class="section-heading">
+                <p class="eyebrow">Role Distribution</p>
+                <h2>Current access levels across your production users.</h2>
+            </div>
+
+            <div class="features-grid">
+                <article class="feature-card" v-for="role in roleBreakdown" :key="role.role">
+                    <h3>{{ role.role }}</h3>
+                    <p>
+                        {{ role.total }} account{{ role.total === 1 ? '' : 's' }} currently assigned to
+                        the {{ role.role }} role.
                     </p>
+                </article>
+            </div>
+        </section>
 
-                    <div class="mt-6 flex flex-wrap gap-3">
-                        <a href="#" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Browse users</a>
-                        <a href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">Export users</a>
-                    </div>
-                </div>
+        <section class="activity-section">
+            <div class="section-heading">
+                <p class="eyebrow">Recent Members</p>
+                <h2>The latest users added to your application.</h2>
+            </div>
 
-                <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[420px]">
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <p class="text-sm text-slate-300">Total users</p>
-                        <p class="mt-2 text-3xl font-semibold">{{ totalUsers }}</p>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <p class="text-sm text-slate-300">Active accounts</p>
-                        <p class="mt-2 text-3xl font-semibold">{{ activeUsers }}</p>
-                        <p class="mt-1 text-xs text-emerald-300">{{ floor( (activeUsers/ totalUsers)*100 ) }}% of all users</p>
+            <div class="activity-list">
+                <div class="activity-item" v-for="user in recentUsers" :key="user.id">
+                    <span class="activity-dot"></span>
+                    <div>
+                        <h3>{{ user.name }}</h3>
+                        <p>
+                            {{ user.email }} • {{ user.role }} • {{ user.status }} • joined
+                            {{ user.created_at }}
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-3">
-            <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-sky-600">Roles</p>
-                <p class="mt-2 text-sm text-slate-500">Assigned access</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">{{  roles.length }} user roles</p>
-                <p class="mt-3 text-sm leading-6 text-slate-600">Accounts are grouped by access level so role labels in the user table are easy to scan and manage.</p>
-            </div>
-            <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-600">Status</p>
-                <p class="mt-2 text-sm text-slate-500">Healthy accounts</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ floor( (activeUsers/ (totalUsers - needVerifyCount))*100 )}}%</p>
-                <p class="mt-3 text-sm leading-6 text-slate-600">Most user accounts are active and up to date, which keeps the status indicators in the table reliable.</p>
-            </div>
-            <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-600">Review queue</p>
-                <p class="mt-2 text-sm text-slate-500">Accounts to verify</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ needVerifyCount }} flagged users</p>
-                <p class="mt-3 text-sm leading-6 text-slate-600">A small set of accounts still needs manual follow-up before all user actions can be completed cleanly.</p>
-            </div>
+        <section class="cta-section">
+            <p class="eyebrow">Account Health</p>
+            <h2>Track how many users are active, inactive, and verified.</h2>
+            <p class="lead cta-copy">
+                Verified users: {{ stats.verifiedUsers }}.
+                Inactive users: {{ stats.inactiveUsers }}.
+                Use the dashboard for deeper filtering, pagination, and account management.
+            </p>
+            <Link :href="route('dashboard')" class="primary-btn">
+                Go to Dashboard
+            </Link>
         </section>
-
-        <section class="overflow-hidden rounded-[30px] border border-slate-200/70 bg-white/85 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div class="flex flex-col gap-5 border-b border-slate-200/70 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-600">Directory</p>
-                    <h2 class="mt-2 text-2xl font-semibold text-slate-900">People overview</h2>
-                    <p class="mt-1 text-sm text-slate-500">Browse, manage, and review your current team members.</p>
-                </div>
-
-                <div class="flex flex-col gap-3 sm:flex-row">
-                    <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-slate-400" viewBox="0 0 24 24">
-                            <path d="M10 18a8 8 0 1 1 5.293-14.001A8 8 0 0 1 10 18zm11.707 2.293-4.825-4.825a10 10 0 1 0-1.414 1.414l4.825 4.825a1 1 0 0 0 1.414-1.414z"/>
-                        </svg>
-                        <input
-                            v-model="filter.search"
-                            type="text"
-                            placeholder="Search member"
-                            class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                        />
-                    </div>
-
-                    <select v-model="filter.role" class="rounded-2xl border  border-slate-200 bg-slate-50 px-6 py-3 text-sm text-slate-700 outline-none">
-                        <option value="all">All roles</option>
-                        <option v-for="role in roles" :key="role">{{ role }}</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-slate-50 whitespace-nowrap">
-                    <tr>
-                        <th class="pl-6 w-10">
-                            <input id="checkbox" type="checkbox" class="hidden peer" />
-                            <label
-                                for="checkbox"
-                                class="relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded-md border border-slate-300 bg-sky-500 p-0.5 before:absolute before:block before:h-full
-  before:w-full before:bg-white peer-checked:before:hidden"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-full fill-white" viewBox="0 0 520 520">
-                                    <path d="M79.423 240.755a47.529 47.529 0 0 0-36.737 77.522l120.73 147.894a43.136 43.136 0 0 0 36.066 16.009c14.654-.787 27.884-8.626 36.319-21.515L486.588 56.773a6.13 6.13 0 0
-  1 .128-.2c2.353-3.613 1.59-10.773-3.267-15.271a13.321 13.321 0 0 0-19.362 1.343q-.135.166-.278.327L210.887 328.736a10.961 10.961 0 0 1-15.585.843l-83.94-76.386a47.319 47.319 0 0 0-31.939-12.438z" />
-                                </svg>
-                            </label>
-                        </th>
-
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Member</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Email</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Role</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Status</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Joined date</th>
-                        <th class="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Action</th>
-                    </tr>
-                    </thead>
-
-                    <tbody class="whitespace-nowrap divide-y divide-slate-200">
-                    <tr
-                        class="transition hover:bg-sky-50/60"
-                        v-for="user in users.data"
-                        :key="user.id"
-                    >
-
-                        <td class="pl-6 w-10">
-                            <input id="checkbox9" type="checkbox" class="hidden peer" />
-                            <label for="checkbox9" class="relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded-md border border-slate-300 bg-sky-500 p-0.5 before:absolute before:block
-  before:h-full before:w-full before:bg-white peer-checked:before:hidden">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-full fill-white" viewBox="0 0 520 520">
-                                    <path d="M79.423 240.755a47.529 47.529 0 0 0-36.737 77.522l120.73 147.894a43.136 43.136 0 0 0 36.066 16.009c14.654-.787 27.884-8.626 36.319-21.515L486.588 56.773a6.13 6.13 0 0
-  1 .128-.2c2.353-3.613 1.59-10.773-3.267-15.271a13.321 13.321 0 0 0-19.362 1.343q-.135.166-.278.327L210.887 328.736a10.961 10.961 0 0 1-15.585.843l-83.94-76.386a47.319 47.319 0 0 0-31.939-12.438z" />
-                                </svg>
-                            </label>
-                        </td>
-
-
-                        <td class="px-4 py-4 text-sm font-medium text-slate-900">
-                            <div class="flex w-max items-center gap-3">
-                                <img :src="user.avatar" alt="team-1" class="h-11 w-11 rounded-2xl object-cover ring-2 ring-slate-100" />
-                                <p>{{user.name}}</p>
-                            </div>
-                        </td>
-                        <td class="px-4 py-4 text-sm font-medium text-slate-600"><a :href="`mailto:${user.email}`" class="hover:text-sky-600">timj1456@gmail.com</a></td>
-                        <td class="px-4 py-4 text-sm font-medium text-slate-600">{{ user.role }}</td>
-                        <td class="px-4 py-4 text-sm font-medium text-slate-600">
-                                  <span class="inline-flex items-center gap-2 rounded-full  px-3 py-1 text-xs font-semibold  ring-1 ring-gray-300">
-                                      <span :class="['h-2 w-2 rounded-full',  { 'bg-emerald-500' : user.status==='active' ,'bg-red-600' : user.status!=='active' } ]"></span>{{ user.status }}
-                                  </span>
-                        </td>
-                        <td class="px-4 py-4 text-sm font-medium text-slate-500">{{ new Date(user.created_at).toDateString()}}</td>
-                        <td class="px-4 py-4 text-sm font-medium">
-                            <div class="flex gap-2">
-
-                                <button  v-if="user.can.edit" type="button" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sky-700 transition hover:bg-sky-100">Edit</button>
-                                <button v-if="user.can.delete" type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 transition hover:bg-rose-100">Delete</button>
-                                <span v-else class="text-sm font-medium text-slate-900">No Premissions</span>
-                            </div>
-                        </td>
-                    </tr>
-
-
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="flex flex-col gap-4 border-t border-slate-200 px-6 py-5 md:flex-row md:items-center md:justify-between">
-                <p class="flex-1 text-sm text-slate-500">Showing {{ users.from }} to {{users.to}} of {{users.total}} entries</p>
-
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <div class="flex items-center gap-3">
-                        <p class="text-sm text-slate-500">Display</p>
-                        <select v-model="filter.count" class="h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none">
-                            <option>10</option>
-                            <option>20</option>
-                            <option>50</option>
-                            <option>100</option>
-                        </select>
-                    </div>
-
-                    <ul class="flex flex-wrap items-center gap-2">
-                        <li v-for="(link, index) in users.links" :key="link.label">
-                            <Link
-                                v-if="link.url"
-                                :href="link.url"
-                                v-html="link.label"
-                                :class="[
-                  'flex min-h-10 min-w-10 items-center justify-center rounded-xl border px-3 text-sm font-medium transition',
-                  link.active
-                      ? 'border-sky-500 bg-sky-500 text-white'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-sky-400 hover:text-sky-600'
-              ]"
-                            />
-
-                            <span
-                                v-else
-                                v-html="link.label"
-                                class="flex min-h-10 min-w-10 cursor-not-allowed items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-400"
-                            />
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+    </section>
 </template>
 
 <style scoped>
+.home-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem 0 2rem;
+}
 
+.hero {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: stretch;
+}
+
+.hero-copy,
+.hero-panel,
+.feature-card,
+.stat-card,
+.activity-section,
+.cta-section {
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+}
+
+.hero-copy {
+    padding: 2rem;
+}
+
+.hero-panel {
+    padding: 2rem;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: #e2e8f0;
+}
+
+.eyebrow {
+    margin: 0 0 0.75rem;
+    color: #2563eb;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 3rem;
+    line-height: 1.1;
+}
+
+.lead {
+    margin: 1rem 0 0;
+    max-width: 720px;
+    color: #475569;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.75rem;
+}
+
+.primary-btn,
+.secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem 1.35rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.primary-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.primary-btn:hover {
+    background: #1d4ed8;
+}
+
+.secondary-btn {
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.secondary-btn:hover {
+    background: #f8fafc;
+}
+
+.panel-label {
+    margin: 0;
+    color: #93c5fd;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hero-panel h2 {
+    margin: 0.75rem 0;
+    color: #ffffff;
+    font-size: 1.9rem;
+}
+
+.panel-copy {
+    margin: 0;
+    color: #cbd5e1;
+    line-height: 1.8;
+}
+
+.stats-grid,
+.features-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stat-card {
+    padding: 1.5rem;
+}
+
+.stat-card strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
+    font-size: 2rem;
+}
+
+.stat-card span {
+    color: #475569;
+    line-height: 1.7;
+}
+
+.section-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.features-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.feature-card {
+    padding: 1.5rem;
+}
+
+.feature-card h3,
+.activity-item h3 {
+    margin: 0 0 0.75rem;
+    color: #0f172a;
+    font-size: 1.2rem;
+    text-transform: capitalize;
+}
+
+.feature-card p,
+.activity-item p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.8;
+}
+
+.activity-section,
+.cta-section {
+    padding: 2rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.activity-dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: #2563eb;
+    flex-shrink: 0;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+}
+
+.cta-copy {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    h1 {
+        font-size: 2.3rem;
+    }
+
+    .section-heading h2 {
+        font-size: 1.65rem;
+    }
+}
 </style>
