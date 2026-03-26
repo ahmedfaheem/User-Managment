@@ -3,45 +3,39 @@
 import {reactive, watch, ref} from "vue";
 import {router} from "@inertiajs/vue3";
 import debounce from 'lodash/debounce'
+import {floor} from "lodash-es";
 const props = defineProps({
     'users':{
         type:Object,
         required: true
     },
-    count: Number,
-    search: String,
+    filter: Object,
+    totalUsers: Number,
+    activeUsers: Number,
+    roles: Array,
+    needVerifyCount:Number
 })
 
 
-const display = reactive({
-    count: props.count ?? 10,
+const filter = reactive({
+    count: props.filter.count,
+    role:  props.filter.role ?? 'all',
+    search: props.filter.search
 })
 
 
-watch(display, function (value){
-   router.get(route('home'),
-       {
-        'count': value.count,
-
-       },
-       {
-           replace: true,
-           preserveScroll: true,
-           preserveState: true
-       }
-   )
-});
 
 
-const search = ref(props.search);
+
+
 
 
 watch(
-    search,
+    filter,
     debounce((value) => {
         router.get(
             route('home'),
-            { search: value, count: display.count },
+            { search: filter.search, count: filter.count, role: filter.role},
             {
                 replace: true,
                 preserveScroll: true,
@@ -66,32 +60,31 @@ watch(
 
             <div class="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-2xl">
-                      <span class="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">
-                          Team Management
-                      </span>
+                    <span class="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">
+                        User Management
+                    </span>
                     <h1 class="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
-                        Team directory with cleaner structure and faster scanning
+                        Manage users, roles, and account status from one workspace
                     </h1>
                     <p class="mt-4 text-sm leading-6 text-slate-300 sm:text-base">
-                        Review member activity, roles, and actions from a more polished dashboard experience.
+                        Review user records, monitor account activity, and handle permissions from a summary that leads directly into the user table below.
                     </p>
+
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <a href="#" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Browse users</a>
+                        <a href="#" class="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">Export users</a>
+                    </div>
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[420px]">
                     <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <p class="text-sm text-slate-300">Total members</p>
-                        <p class="mt-2 text-3xl font-semibold">48</p>
-                        <p class="mt-1 text-xs text-emerald-300">+6 this month</p>
+                        <p class="text-sm text-slate-300">Total users</p>
+                        <p class="mt-2 text-3xl font-semibold">{{ totalUsers }}</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <p class="text-sm text-slate-300">Active now</p>
-                        <p class="mt-2 text-3xl font-semibold">36</p>
-                        <p class="mt-1 text-xs text-emerald-300">75% engagement</p>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                        <p class="text-sm text-slate-300">Pending review</p>
-                        <p class="mt-2 text-3xl font-semibold">09</p>
-                        <p class="mt-1 text-xs text-amber-300">Needs attention</p>
+                        <p class="text-sm text-slate-300">Active accounts</p>
+                        <p class="mt-2 text-3xl font-semibold">{{ activeUsers }}</p>
+                        <p class="mt-1 text-xs text-emerald-300">{{ floor( (activeUsers/ totalUsers)*100 ) }}% of all users</p>
                     </div>
                 </div>
             </div>
@@ -99,19 +92,22 @@ watch(
 
         <section class="grid gap-4 md:grid-cols-3">
             <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm text-slate-500">Departments</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">8 active teams</p>
-                <p class="mt-1 text-sm text-slate-600">Balanced across design, product, QA, and engineering.</p>
+                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-sky-600">Roles</p>
+                <p class="mt-2 text-sm text-slate-500">Assigned access</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">{{  roles.length }} user roles</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600">Accounts are grouped by access level so role labels in the user table are easy to scan and manage.</p>
             </div>
             <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm text-slate-500">Response rate</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">92%</p>
-                <p class="mt-1 text-sm text-slate-600">Most updates were reviewed within the past day.</p>
+                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-600">Status</p>
+                <p class="mt-2 text-sm text-slate-500">Healthy accounts</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ floor( (activeUsers/ (totalUsers - needVerifyCount))*100 )}}%</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600">Most user accounts are active and up to date, which keeps the status indicators in the table reliable.</p>
             </div>
             <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
-                <p class="text-sm text-slate-500">Open hiring</p>
-                <p class="mt-2 text-2xl font-semibold text-slate-900">3 roles</p>
-                <p class="mt-1 text-sm text-slate-600">Frontend, QA, and product operations remain top priority.</p>
+                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-600">Review queue</p>
+                <p class="mt-2 text-sm text-slate-500">Accounts to verify</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">{{ needVerifyCount }} flagged users</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600">A small set of accounts still needs manual follow-up before all user actions can be completed cleanly.</p>
             </div>
         </section>
 
@@ -129,18 +125,16 @@ watch(
                             <path d="M10 18a8 8 0 1 1 5.293-14.001A8 8 0 0 1 10 18zm11.707 2.293-4.825-4.825a10 10 0 1 0-1.414 1.414l4.825 4.825a1 1 0 0 0 1.414-1.414z"/>
                         </svg>
                         <input
-                            v-model="search"
+                            v-model="filter.search"
                             type="text"
                             placeholder="Search member"
                             class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
                         />
                     </div>
 
-                    <select class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none">
-                        <option>All roles</option>
-                        <option>Product</option>
-                        <option>Design</option>
-                        <option>Engineering</option>
+                    <select v-model="filter.role" class="rounded-2xl border  border-slate-200 bg-slate-50 px-6 py-3 text-sm text-slate-700 outline-none">
+                        <option value="all">All roles</option>
+                        <option v-for="role in roles" :key="role">{{ role }}</option>
                     </select>
                 </div>
             </div>
@@ -226,7 +220,7 @@ watch(
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <div class="flex items-center gap-3">
                         <p class="text-sm text-slate-500">Display</p>
-                        <select v-model="display.count" class="h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none">
+                        <select v-model="filter.count" class="h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none">
                             <option>10</option>
                             <option>20</option>
                             <option>50</option>

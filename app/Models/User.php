@@ -31,10 +31,11 @@ class User extends Authenticatable
         ];
     }
 
+
     protected function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? asset('storage/' . $value) : 'https://readymadeui.com/team-3.webp' ,
+            get: fn ($value) => $value ? asset('storage/' . $value) : asset('storage/avatars/user.png') ,
         );
     }
 }
