@@ -42,6 +42,7 @@ class DashboardController extends Controller
                 'needVerifyCount' => User::where('email_verified_at', null)->count(),
                 'filter'=>['search' => $request->search, 'count' => $pageCount, 'role' => $request->role ?? null],
                 'currentUser' => Auth::user(),
+                'permissions' => Auth::user()->getPermissionNames(),
             ]);
     }
 

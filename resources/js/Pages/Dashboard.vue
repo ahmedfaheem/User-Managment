@@ -19,7 +19,8 @@ const props = defineProps({
     activeUsers: Number,
     roles: Array,
     needVerifyCount:Number,
-    currentUser: Object
+    currentUser: Object,
+    permissions: Object
 })
 
 let users_updated = ref(false);
@@ -98,7 +99,7 @@ const deleteUser= function (id, name){
 
                     <div class="mt-6 flex flex-wrap gap-3">
                  <!--       <Link :href="route('dashboard')" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Browse users</Link>-->
-                        <a v-if="currentUser.role=='admin'" :href="route('export-users')" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Export users</a>
+                        <a v-if="permissions.includes('export')" :href="route('export-users')" class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-100">Export users</a>
                     </div>
                 </div>
 
@@ -228,9 +229,9 @@ const deleteUser= function (id, name){
                         <td class="px-4 py-4 text-sm font-medium">
                             <div class="flex gap-2">
 
-                                <button  v-if="user.can.edit" type="button" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sky-700 transition hover:bg-sky-100">Edit</button>
-                                <button @click="deleteUser(user.id, user.name)" v-if="user.can.delete" type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 transition hover:bg-rose-100">Delete</button>
-                                <span v-else class="text-sm font-medium text-slate-900">No Premissions</span>
+                                <Link :href="route('users.edit', {'id' : user.id})"  v-if="permissions.includes('edit')" type="button" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sky-700 transition hover:bg-sky-100">Edit</Link>
+                                <button @click="deleteUser(user.id, user.name)" v-if="permissions.includes('delete')" type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 transition hover:bg-rose-100">Delete</button>
+                                <span v-if="!permissions.includes('edit') && !permissions.includes('delete')" class="text-sm font-medium text-slate-900">No Premissions</span>
                             </div>
                         </td>
                     </tr>

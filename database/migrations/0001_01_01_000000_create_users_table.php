@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->enum('role', ['admin', 'user'])->default('user');
+            $table->string('bio')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
