@@ -1,6 +1,6 @@
 <script setup>
 
-import {reactive, watch, ref} from "vue";
+import {reactive, watch} from "vue";
 import {Link, router} from "@inertiajs/vue3";
 import debounce from 'lodash/debounce'
 import {floor} from "lodash-es";
@@ -30,7 +30,7 @@ watch(
     debounce((value) => {
         router.get(
             route('dashboard'),
-            { search: filter.search, count: filter.count, role: filter.role},
+            { search: value.search, count: value.count, role: value.role},
             {
                 replace: true,
                 preserveScroll: true,
