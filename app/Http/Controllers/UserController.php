@@ -14,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-      
+
     }
 
     /**
@@ -60,8 +60,20 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(string $user)
     {
-        //
+        $user = User::find($user);
+
+        if (! $user) {
+            return redirect()
+                ->back()
+                ->withErrors(['delete'=>'User not found.']);
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->back()
+            ->with('message', 'User'. $user->name .' deleted successfully.');
     }
 }

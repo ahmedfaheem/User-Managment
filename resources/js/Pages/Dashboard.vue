@@ -1,9 +1,14 @@
 <script setup>
 
-import {reactive, watch} from "vue";
+import {reactive, watch,ref} from "vue";
 import {Link, router} from "@inertiajs/vue3";
 import debounce from 'lodash/debounce'
 import {floor} from "lodash-es";
+import { useToast } from "vue-toastification";
+import  {usePage} from "@inertiajs/vue3";
+
+const  toast = useToast();
+const page =usePage();
 const props = defineProps({
     'users':{
         type:Object,
@@ -17,12 +22,15 @@ const props = defineProps({
     currentUser: Object
 })
 
+let users_updated = ref(false);
 
 const filter = reactive({
     count: props.filter.count,
     role:  props.filter.role ?? 'all',
-    search: props.filter.search
+    search: props.filter.search,
+    users_updated: users_updated.value,
 })
+
 
 
 watch(
@@ -38,6 +46,28 @@ watch(
             }
         )    }, 500)
 )
+
+
+const deleteUser= function (id, name){
+
+     router.delete(route('users.destroy', {id:id}) ,{
+         preserveState: true,
+         preserveScroll: true,
+         replace: true,
+
+         onSuccess : ()=>{
+         users_updated.value= true;
+         toast.success(page.props.flash.message);
+         },
+         onError : (error) =>{
+
+             toast.error(error.delete);
+         },
+         onFinish: ()=>{
+             users_updated.value=false;
+         }
+     })
+}
 </script>
 
 <template>
@@ -46,6 +76,9 @@ watch(
 
     <div class="p-3 bg-green-400 my-3" v-if="$page.flash.message" >
         {{$page.flash.message}}
+    </div>
+    <div class="p-3 bg-red-400 my-3 text-white" v-if="$page.flash.error" >
+        {{$page.flash.error}}
     </div>
     <div class="space-y-8">
         <section class="relative overflow-hidden rounded-[28px] bg-slate-950 px-6 py-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.24)] sm:px-8 lg:px-10">
@@ -196,7 +229,7 @@ watch(
                             <div class="flex gap-2">
 
                                 <button  v-if="user.can.edit" type="button" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sky-700 transition hover:bg-sky-100">Edit</button>
-                                <button v-if="user.can.delete" type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 transition hover:bg-rose-100">Delete</button>
+                                <button @click="deleteUser(user.id, user.name)" v-if="user.can.delete" type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 transition hover:bg-rose-100">Delete</button>
                                 <span v-else class="text-sm font-medium text-slate-900">No Premissions</span>
                             </div>
                         </td>

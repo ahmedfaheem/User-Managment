@@ -4,6 +4,8 @@ import { createApp, h } from 'vue'
 import {createInertiaApp, Head, Link} from '@inertiajs/vue3'
 import Layout from '@/Layouts/Layout.vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 createInertiaApp({
     title : (title) => { return `My App - ${title}`},
@@ -19,6 +21,7 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)  // use routes by name
+            .use(Toast)
             .component("Head", Head)
             .component("Link", Link)
             .mount(el)
